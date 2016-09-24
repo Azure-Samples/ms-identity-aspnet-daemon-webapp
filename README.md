@@ -32,7 +32,7 @@ If you have an existing application that you have registered in the past, feel f
 In order to use the v2.0 admin consent endpoint, you'll need to declare the application permissions your app will use ahead of time.  While still in the registration portal,
 
 - Locate the **Microsoft Graph Permissions** section on your app registration.
-- Under **Application Permissions**, add the `Group.Read.All` permission.
+- Under **Application Permissions**, add the `User.Read.All` permission.
 - Be sure to **Save** your app registration.
 
 ### Download & configure the sample code
