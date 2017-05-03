@@ -19,7 +19,7 @@ For more information on the concepts used in this sample, be sure to read the [v
 Follow the steps below to run the application and create your own multi-tenant daemon.  We reccommend using Visual Studio 2015 to do so.
 
 ### Register an app
-Create a new app at [apps.dev.microsoft.com](https://apps.dev.microsoft.com), or follow these [detailed steps](active-directory-v2-app-registration.md).  Make sure to:
+Create a new app at [apps.dev.microsoft.com](https://apps.dev.microsoft.com), or follow these [detailed steps](https://docs.microsoft.com/azure/active-directory/develop/active-directory-v2-app-registration).  Make sure to:
 
 - Copy down the **Application Id** assigned to your app, you'll need it soon.
 - Add the **Web** platform for your app.

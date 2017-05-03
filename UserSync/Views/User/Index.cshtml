@@ -61,7 +61,14 @@
             $spinner.hide("slow");
             $success.fadeIn().delay(1000).queue(function () { location.reload(); })
         }).fail(function (data) {
-            console.log(data);
+
+            // If we got a 403, the user needs to grant our app permissions.
+            if (data.status == 403) {
+                window.location.replace("/Account/GrantPermissions");
+                return;
+            }
+
+            // If we got any other error, show a generic message to the user.
             $error.show();
             $spinner.hide();
         })

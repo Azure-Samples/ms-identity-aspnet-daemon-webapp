@@ -27,15 +27,25 @@ namespace UserSync.Controllers
         [Authorize]
         public async Task Get(string tenantId)
         {
-            // Get a token for the Microsoft Graph
-            ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(String.Format(authorityFormat, tenantId),Startup.clientId, Startup.redirectUri, new ClientCredential(Startup.clientSecret), new TokenCache());
-            AuthenticationResult authResult = await daemonClient.AcquireTokenForClient(new string[] { msGraphScope }, null);
+            // Get a token for the Microsoft Graph. If this line throws an exception for
+            // any reason, we'll just let the exception be returned as a 500 response
+            // to the caller, and show a generic error message to the user.
+            ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(Startup.clientId, String.Format(authorityFormat, tenantId), Startup.redirectUri, new ClientCredential(Startup.clientSecret), null, new TokenCache());
+            AuthenticationResult authResult = await daemonClient.AcquireTokenForClientAsync(new string[] { msGraphScope });
 
             // Query for list of users in the tenant
             HttpClient client = new HttpClient();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, msGraphQuery);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
             HttpResponseMessage response = await client.SendAsync(request);
+
+            // If the token we used was insufficient to make the query, drop the token from the cache.
+            // The Users page of the website will show a message to the user instructing them to grant
+            // permissions to the app (see User/Index.cshtml).
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                //daemonClient.AppTokenCache.Clear(Startup.clientId); TODO
+            }
 
             if (!response.IsSuccessStatusCode)
             {
