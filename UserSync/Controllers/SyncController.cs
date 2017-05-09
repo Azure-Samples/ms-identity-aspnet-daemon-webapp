@@ -44,7 +44,17 @@ namespace UserSync.Controllers
             // permissions to the app (see User/Index.cshtml).
             if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                //daemonClient.AppTokenCache.Clear(Startup.clientId); TODO
+                // BUG: Here, we should clear MSAL's app token cache to ensure that on a subsequent call
+                // to SyncController, MSAL does not return the same access token that resulted in this 403.
+                // By clearing the cache, MSAL will be forced to retrieve a new access token from AAD, 
+                // which will contain the most up-to-date set of permissions granted to the app. Since MSAL
+                // currently does not provide a way to clear the app token cache, we have commented this line
+                // out. Thankfully, since this app uses the default in-memory app token cache, the app still
+                // works correctly, since the in-memory cache is not persistent across calls to SyncController
+                // anyway. If you build a persistent app token cache for MSAL, you should make sure to clear 
+                // it at this point in the code.
+                //
+                //daemonClient.AppTokenCache.Clear(Startup.clientId);
             }
 
             if (!response.IsSuccessStatusCode)
