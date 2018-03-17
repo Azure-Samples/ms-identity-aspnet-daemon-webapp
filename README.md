@@ -2,29 +2,39 @@
 services: active-directory
 platforms: dotnet
 author: jmprieur
+level: 400
+client: .NET Framework 4.5 mvc
+endpoint: AAD V2
 ---
 
 # Build a multi-tenant daemon with the v2.0 endpoint
+## About this sample
 This sample application shows how to use the [Azure AD v2.0 endpoint](http://aka.ms/aadv2) to access the data of Microsoft business customers in a long-running, non-interactive process.  It uses the OAuth2 client credentials grant to acquire an access token which can be used to call the [Microsoft Graph](https://graph.microsoft.io) and access organizational data.
 
 The app is built as an ASP.NET 4.5 MVC application, using the OWIN OpenID Connect middleware to sign-in users.  Its "daemon" component is simply an API controller which, when called, syncs a list of users from the customer's Azure AD tenant.  This `SyncController.cs` is triggered by an ajax call in the web application, and uses the preview Microsoft Authentication Library (MSAL) to perform token acquisition.
 
+## Scenario
 Because the app is a multi-tenant app intended for use by any Microsoft business customer, it must provide a way for customers to "sign up" or "connect" the application to their company data.  During the connect flow, a company administrator can grant **application permissions** directly to the app so that it can access company data in a non-interactive fashion, without the presence of a signed-in user.  The majority of the logic in this sample shows how to achieve this connect flow using the v2.0 **admin consent** endpoint.
 
 For more information on the concepts used in this sample, be sure to read the [v2.0 endpoint client credentials protocol documentation](https://azure.microsoft.com/documentation/articles/active-directory-v2-protocols-oauth-client-creds).
 
 > Looking for previous versions of this code sample? Check out the tags on the [releases](../../releases) GitHub page.
 
-## Running the sample app
-Follow the steps below to run the application and create your own multi-tenant daemon.  We reccommend using Visual Studio 2015 to do so.
+## How To Run this Sample
+
+To run this sample you will need:
+- [Visual Studio 2017](https://aka.ms/vsdownload)
+- An Internet connection
+- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, please see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/) 
+
 
 ### Register an app
 Create a new app at [apps.dev.microsoft.com](https://apps.dev.microsoft.com), or follow these [detailed steps](https://docs.microsoft.com/azure/active-directory/develop/active-directory-v2-app-registration).  Make sure to:
 
 - Copy down the **Application Id** assigned to your app, you'll need it soon.
 - Add the **Web** platform for your app.
-- Enter two **Redirect URI**s. The base URL for this sample, `https://localhost:44316/`, as well as `https://localhost:44316/Account/GrantPermissions`.  These are the locations which the v2.0 endpoint will be allowed to return to after authentication.
-- Generate an **Application Secret** of the type **password**, and copy it for later.  Note that in production apps you should always use certificates as your application secrets, but for this sample we will use a simple shared secret password.
+- Enter two **Redirect URLs**s. The base URL for this sample, `https://localhost:44316/`, as well as `https://localhost:44316/Account/GrantPermissions`.  These are the locations which the v2.0 endpoint will be allowed to return to after authentication.
+- Generate an **Application Secret** of the type **Password**, and copy it for later.  Note that in production apps you should always use certificates as your application secrets, but for this sample we will use a simple shared secret password.
 
 If you have an existing application that you have registered in the past, feel free to use that instead of creating a new registration.
 
@@ -52,6 +62,7 @@ When you sign in, the app will first ask you for permission to sign you in & rea
 
 The application will then ask for permission to read the list of users in your tenant.  When you grant the permission, the application will then be able to query for users at any point.  You can verify this by clicking the **Sync Users** button on the users page, refreshing the list of users.  Try adding or removing a user and re-syncing the list (but note that it only syncs the first page of users!).
 
+## About The Code
 The relevant code for this sample is in the following files:
 
 - Initial sign-in: `App_Start\Startup.Auth.cs`, `Controllers\AccountController.cs`
