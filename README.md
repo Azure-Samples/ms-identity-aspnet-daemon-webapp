@@ -3,10 +3,11 @@ services: active-directory
 platforms: dotnet
 author: jmprieur
 level: 400
-client: .NET Framework 4.5 mvc
+client: ASP.NET MVC
+service: Microsoft Graph
 endpoint: AAD V2
 ---
-
+![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/33/badge)
 # Build a multi-tenant daemon with the v2.0 endpoint
 ## About this sample
 This sample application shows how to use the [Azure AD v2.0 endpoint](http://aka.ms/aadv2) to access the data of Microsoft business customers in a long-running, non-interactive process.  It uses the OAuth2 client credentials grant to acquire an access token which can be used to call the [Microsoft Graph](https://graph.microsoft.io) and access organizational data.
