@@ -3,7 +3,7 @@ services: active-directory
 platforms: dotnet
 author: jmprieur
 level: 400
-client: .NET Framework 4.6 MVC
+client: .NET Framework 4.6.1 MVC
 service: Microsoft Graph
 endpoint: AAD V2
 ---
@@ -94,6 +94,9 @@ The relevant code for this sample is in the following files:
 11. Add a new **Web API 2 Controller - Empty** called `SyncController`. Replace the implementation with the contents of the file of same name from the sample.
 12. For ths user interface, in the `Views\Account` folder, add three **Empty (without model) Views** named `GrantPermissions`, `Index` and `UserMismatch` and one named `Index` in the `Views\User` folder. Replace the implementation with the contents of the file of the same name from the sample. 
 13. Update the `Shared\_Layout.cshtml` and `Home\Index.cshtml` to correctly link the various views together.     
+
+## Troubleshooting
+If you are repeateadly asked to Grant permissions. See the note in [SyncController] (https://github.com/Azure-Samples/active-directory-dotnet-daemon-v2/blob/master/UserSync/Controllers/SyncController.cs) on how to clear your token cache.
 
 ## Community Help and Support
 
