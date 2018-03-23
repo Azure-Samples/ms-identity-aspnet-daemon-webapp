@@ -19,23 +19,23 @@
 
     <table class="table table-striped table-hover table-condensed">
         <thead>
-            <tr>
+    <tr>
                 <th>Name</th>
                 <th>ID</th>
                 <th>UPN</th>
                 <th>Job Title</th>
-            </tr>
+    </tr>
         </thead>
         <tbody>
             @foreach (UserSync.Models.MsGraphUser user in ViewBag.Users)
             {
-                <tr>
+    <tr>
                     <td>@user.displayName</td>
                     <td>@user.id</td>
                     <td>@user.userPrincipalName</td>
                     <td>@user.jobTitle</td>
-                </tr>
-            }
+    </tr>
+}
         </tbody>
     </table>
 
