@@ -7,14 +7,18 @@ client: .NET Framework 4.6.1 MVC
 service: Microsoft Graph
 endpoint: AAD V2
 ---
-![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/33/badge)
-# Build a multi-tenant daemon with the v2.0 endpoint
+# Build a multi-tenant daemon with the Azure AD v2.0 endpoint
+
+![Build Badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/33/badge)
+
 ## About this sample
+
 This sample application shows how to use the [Azure AD v2.0 endpoint](http://aka.ms/aadv2) to access the data of Microsoft business customers in a long-running, non-interactive process.  It uses the OAuth2 client credentials grant to acquire an access token which can be used to call the [Microsoft Graph](https://graph.microsoft.io) and access organizational data.
 
 The app is built as an ASP.NET 4.5 MVC application, using the OWIN OpenID Connect middleware to sign-in users.  Its "daemon" component is simply an API controller which, when called, syncs a list of users from the customer's Azure AD tenant.  This `SyncController.cs` is triggered by an ajax call in the web application, and uses the preview Microsoft Authentication Library (MSAL) to perform token acquisition.
 
 ## Scenario
+
 Because the app is a multi-tenant app intended for use by any Microsoft business customer, it must provide a way for customers to "sign up" or "connect" the application to their company data.  During the connect flow, a company administrator can grant **application permissions** directly to the app so that it can access company data in a non-interactive fashion, without the presence of a signed-in user.  The majority of the logic in this sample shows how to achieve this connect flow using the v2.0 **admin consent** endpoint.
 
 ![Topology](./ReadmeFiles/topology.png)
@@ -26,14 +30,16 @@ For more information on the concepts used in this sample, be sure to read the [v
 ## How To Run this Sample
 
 To run this sample you will need:
+
 - [Visual Studio 2017](https://aka.ms/vsdownload)
 - An Internet connection
-- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, please see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/) 
+- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, please see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/)
 - One or more user account in your Azure AD tenant. This sample will not work with a Microsoft account (formerly Windows Live account), so if you signed in to the Azure portal with a Microsoft account and have never created a user account in your directory before, you need to do that now. This sample will not work with a Microsoft account.
 
-
 ### Register an app
+
 Create a new app at [apps.dev.microsoft.com](https://apps.dev.microsoft.com), or follow these [detailed steps](https://docs.microsoft.com/azure/active-directory/develop/active-directory-v2-app-registration).  Make sure to:
+
 - Use an identity that will be known by the tenant you intend to use with the application
 - Copy down the **Application Id** assigned to your app, you'll need it soon.
 - Add the **Web** platform for your app.
@@ -43,6 +49,7 @@ Create a new app at [apps.dev.microsoft.com](https://apps.dev.microsoft.com), or
 If you have an existing application that you have registered in the past, feel free to use that instead of creating a new registration.
 
 ### Configure your app for admin consent
+
 In order to use the v2.0 admin consent endpoint, you'll need to declare the application permissions your app will use ahead of time.  While still in the registration portal,
 
 - Locate the **Microsoft Graph Permissions** section on your app registration.
@@ -50,6 +57,7 @@ In order to use the v2.0 admin consent endpoint, you'll need to declare the appl
 - Be sure to **Save** your app registration.
 
 ### Download & configure the sample code
+
 You can download this repo as a .zip file using the button above, or run the following command:
 
 `git clone https://github.com/Azure-Samples/active-directory-dotnet-daemon-v2.git`
@@ -60,17 +68,19 @@ Once you've downloaded the sample, open it using Visual Studio.  Open the `App_S
 - Replace the `clientSecret` value with the application secret you copied above during App Registration.
 
 ### Run the sample
+
 Start the UserSync application, and begin by signing in as an administrator in your Azure AD tenant.  If you don't have an Azure AD tenant for testing, you can [follow these instructions](https://azure.microsoft.com/documentation/articles/active-directory-howto-tenant/) to get one.
 
-When you sign in, the app will first ask you for permission to sign you in & read your user profile.  This allows the application to ensure that you are a business user.  
+When you sign in, the app will first ask you for permission to sign you in & read your user profile.  This allows the application to ensure that you are a business user.
 ![User Consent](./ReadmeFiles/FirstConsent.PNG)
 The application will then try to sync a list of users from your Azure AD tenant via the Microsoft Graph.  If it is unable to do so, it will ask you (the tenant administrator) to connect your tenant to the application.
 
-The application will then ask for permission to read the list of users in your tenant.  
+The application will then ask for permission to read the list of users in your tenant.
 ![Admin Consent](./ReadmeFiles/adminconsent.PNG)
 When you grant the permission, the application will then be able to query for users at any point.  You can verify this by clicking the **Sync Users** button on the users page, refreshing the list of users.  Try adding or removing a user and re-syncing the list (but note that it only syncs the first page of users!).
 
-## About The Code
+## About the code
+
 The relevant code for this sample is in the following files:
 
 - Initial sign-in: `App_Start\Startup.Auth.cs`, `Controllers\AccountController.cs`.  In particular, the actions on the controller have an Authorize attribute, which forces the user to sign-in. The application uses the [authorization code flow](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-with-authorization-codes-on-web-apps) to sign-in the user.
@@ -78,9 +88,10 @@ The relevant code for this sample is in the following files:
 - Displaying the list of users from the local in-memory store: `Controllers\UserController.cs`
 - Acquiring permissions from the tenant admin using the admin consent endpoint: `Controllers\AccountController.cs`
 
+## How to recreate this sample
 
-## How To Recreate This Sample
 ### Code for the service
+
 1. In Visual Studio 2017, create a new `Visual C#` `ASP.NET Web Application (.NET Framework)`. In the next screen choose the `MVC` project template. Also add folder and core references for `Web API` as we would be adding a Web API controller later.  Leave the project's chosen authentication mode as the default, i.e. `No Authentication`".
 2. Select the project in the **Solution Explorer** window and press the **F4** key to bring project properties. In the project properties, set **SSL Enabled** to be `True`. Note the **SSL URL**. You will need it when configuring this application's registration in the Azure Portal.
 3. Add the following ASP.Net OWIN middleware NuGets: `Microsoft.Owin.Security.ActiveDirectory`, `Microsoft.Owin.Security.Cookies` and `Microsoft.Owin.Host.SystemWeb`, `Microsoft.IdentityModel.Protocol.Extensions`, `Microsoft.Owin.Security.OpenIdConnect` and `Microsoft.Identity.Client (preview)`. You will need to check the **Include prerelease** box to obtain the preview version of the `Microsoft Authentication Library (MSAL) Preview for .NET` library.
@@ -92,11 +103,12 @@ The relevant code for this sample is in the following files:
 9. Add a new **MVC 5 Controller - Empty** called `AccountController`. Replace the implementation with the contents of the file of same name from the sample.
 10. Add a new **MVC 5 Controller - Empty** called `UserController`. Replace the implementation with the contents of the file of same name from the sample.
 11. Add a new **Web API 2 Controller - Empty** called `SyncController`. Replace the implementation with the contents of the file of same name from the sample.
-12. For ths user interface, in the `Views\Account` folder, add three **Empty (without model) Views** named `GrantPermissions`, `Index` and `UserMismatch` and one named `Index` in the `Views\User` folder. Replace the implementation with the contents of the file of the same name from the sample. 
-13. Update the `Shared\_Layout.cshtml` and `Home\Index.cshtml` to correctly link the various views together.     
+12. For ths user interface, in the `Views\Account` folder, add three **Empty (without model) Views** named `GrantPermissions`, `Index` and `UserMismatch` and one named `Index` in the `Views\User` folder. Replace the implementation with the contents of the file of the same name from the sample.
+13. Update the `Shared\_Layout.cshtml` and `Home\Index.cshtml` to correctly link the various views together.
 
 ## Troubleshooting
-If you are repeateadly asked to Grant permissions. See the note in [SyncController] (https://github.com/Azure-Samples/active-directory-dotnet-daemon-v2/blob/master/UserSync/Controllers/SyncController.cs) on how to clear your token cache.
+
+If you are repeateadly asked to Grant permissions. See the note in [SyncController](https://github.com/Azure-Samples/active-directory-dotnet-daemon-v2/blob/master/UserSync/Controllers/SyncController.cs) on how to clear your token cache.
 
 ## Community Help and Support
 
@@ -115,7 +127,9 @@ If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## More information
+
 For more information see MSAL.NET's conceptual documentation:
+
 - [Recommended pattern to acquire a token in public client applications](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/AcquireTokenSilentAsync-using-a-cached-token#recommended-call-pattern-in-public-client-applications)
-- [Acquiring tokens ineractively in public client applications](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-interactively) 
+- [Acquiring tokens ineractively in public client applications](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-interactively)
 - [Customizing Token cache serialization](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization)
