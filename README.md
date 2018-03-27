@@ -72,11 +72,15 @@ Once you've downloaded the sample, open it using Visual Studio.  Open the `App_S
 Start the UserSync application, and begin by signing in as an administrator in your Azure AD tenant.  If you don't have an Azure AD tenant for testing, you can [follow these instructions](https://azure.microsoft.com/documentation/articles/active-directory-howto-tenant/) to get one.
 
 When you sign in, the app will first ask you for permission to sign you in & read your user profile.  This consent allows the application to ensure that you are a business user.
+
 ![User Consent](./ReadmeFiles/FirstConsent.PNG)
+
 The application will then try to sync a list of users from your Azure AD tenant, via the Microsoft Graph.  If it is unable to do so, it will ask you (the tenant administrator) to connect your tenant to the application.
 
 The application will then ask for permission to read the list of users in your tenant.
+
 ![Admin Consent](./ReadmeFiles/adminconsent.PNG)
+
 When you grant the permission, the application will then be able to query for users at any point.  You can verify this by clicking the **Sync Users** button on the users page, refreshing the list of users.  Try adding or removing a user and resyncing the list (but note that it only syncs the first page of users!).
 
 ## About the code
