@@ -44,7 +44,7 @@ Create a new app at [apps.dev.microsoft.com](https://apps.dev.microsoft.com), or
 - Copy down the **Application ID** assigned to your app, you'll need it soon.
 - Generate an **Application Secret** of the type **Password**, and copy it for later.  Note that in production apps you should always use certificates as your application secrets, but this sample will only use a shared secret password.
 - Add the **Web** platform for your app.
-- Enter two **Redirect URLs**s. The base URL for this sample, `https://localhost:44316/`, as well as `https://localhost:44316/Account/GrantPermissions`.  These URLs are the locations, which the v2.0 endpoint will be allowed to return to after authentication.
+- Enter two **Redirect URLs**. The base URL for this sample, `https://localhost:44316/`, as well as `https://localhost:44316/Account/GrantPermissions`.  These URLs are the locations, which the v2.0 endpoint will be allowed to return to after authentication.
 
 If you have an existing application that you've registered in the past, feel free to use that instead of creating a new registration.
 
