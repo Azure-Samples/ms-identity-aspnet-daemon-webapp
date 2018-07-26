@@ -25,8 +25,6 @@ SOFTWARE.
 using Microsoft.Identity.Client;
 using System;
 using System.Runtime.Caching;
-using System.Threading;
-using System.Web;
 
 namespace UserSync.Utils
 {
@@ -35,7 +33,6 @@ namespace UserSync.Utils
     /// </summary>
     public class MSALCache
     {
-        private static readonly ReaderWriterLockSlim SessionLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private readonly string appId;
         private readonly string cacheId;
 
@@ -53,27 +50,23 @@ namespace UserSync.Utils
 
         public void Load()
         {
-            SessionLock.EnterReadLock();
+            // Ideally, methods that load and persist should be thread safe.
             this.cache.Deserialize((byte[])this.memoryCache.Get(this.cacheId));
-            SessionLock.ExitReadLock();
         }
 
         public void Persist()
         {
-            SessionLock.EnterWriteLock();
+            // Ideally, methods that load and persist should be thread safe.
 
             // Optimistically set HasStateChanged to false. We need to do it early to avoid losing changes made by a concurrent thread.
             this.cache.HasStateChanged = false;
 
             // Reflect changes in the persistent store
             this.memoryCache.Set(this.cacheId, this.cache.Serialize(), this.cacheDuration);
-            SessionLock.ExitWriteLock();
         }
 
         public void Clear()
         {
-            SessionLock.EnterWriteLock();
-
             // Optimistically set HasStateChanged to false. We need to do it early to avoid losing changes made by a concurrent thread.
             this.cache.HasStateChanged = false;
 
@@ -81,7 +74,6 @@ namespace UserSync.Utils
             this.memoryCache.Remove(this.cacheId);
 
             this.Load(); // Nulls the currently deserialized instance
-            SessionLock.ExitWriteLock();
         }
 
         // Triggered right before MSAL needs to access the cache.
