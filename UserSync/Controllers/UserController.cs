@@ -22,14 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
 using System.Security.Claims;
 using System.Web.Mvc;
-using System.Web.SessionState;
 
 namespace UserSync.Controllers
 {
-    [SessionState(SessionStateBehavior.Required)]
     public class UserController : Controller
     {
         private const string TenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";

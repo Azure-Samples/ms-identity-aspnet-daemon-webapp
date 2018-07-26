@@ -22,24 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
+using Microsoft.Identity.Client;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
-using System.Web.Mvc;
-using System.Web.SessionState;
-using Microsoft.Identity.Client;
-using Newtonsoft.Json;
 using UserSync.Models;
 using UserSync.Utils;
 
 namespace UserSync.Controllers
 {
-    [SessionState(SessionStateBehavior.Required)]
     public class SyncController : ApiController
     {
         private const string AuthorityFormat = "https://login.microsoftonline.com/{0}/v2.0";
