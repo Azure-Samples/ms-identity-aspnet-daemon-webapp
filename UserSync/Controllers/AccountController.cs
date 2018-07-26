@@ -26,8 +26,6 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
@@ -36,7 +34,7 @@ namespace UserSync.Controllers
 {
     public class AccountController : Controller
     {
-        private const string adminConsentUrlFormat = "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
+        private const string AdminConsentUrlFormat = "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
 
         // GET: Account
         public ActionResult Index()
@@ -81,7 +79,7 @@ namespace UserSync.Controllers
         public ActionResult RequestPermissions()
         {
             return new RedirectResult(
-                String.Format(adminConsentUrlFormat,
+                String.Format(AdminConsentUrlFormat,
                 ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value,
                 Startup.clientId,
                 HttpUtility.UrlEncode(Startup.redirectUri + "Account/GrantPermissions")));

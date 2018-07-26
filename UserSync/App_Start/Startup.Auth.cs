@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security;
@@ -29,7 +31,6 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Notifications;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
-using System.Threading.Tasks;
 
 namespace UserSync
 {
@@ -47,27 +48,23 @@ namespace UserSync
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
-            {
-                ClientId = clientId,
-                Authority = authority,
-                RedirectUri = redirectUri,
-                PostLogoutRedirectUri = redirectUri,
-                Scope = "openid profile",
-                ResponseType = "id_token",
-                TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    NameClaimType = "name"
-                },
-                Notifications = new OpenIdConnectAuthenticationNotifications
-                {
-                    AuthenticationFailed = OnAuthenticationFailed,
-                    SecurityTokenValidated = OnSecurityTokenValidated,
-                }
-            });
+                                               {
+                                                   ClientId = clientId,
+                                                   Authority = authority,
+                                                   RedirectUri = redirectUri,
+                                                   PostLogoutRedirectUri = redirectUri,
+                                                   Scope = "openid profile",
+                                                   ResponseType = "id_token",
+                                                   TokenValidationParameters = new TokenValidationParameters { ValidateIssuer = false, NameClaimType = "name" },
+                                                   Notifications = new OpenIdConnectAuthenticationNotifications
+                                                                   {
+                                                                       AuthenticationFailed = this.OnAuthenticationFailedAsync,
+                                                                       SecurityTokenValidated = this.OnSecurityTokenValidatedAsync
+                                                                   }
+                                               });
         }
 
-        private Task OnSecurityTokenValidated(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
+        private Task OnSecurityTokenValidatedAsync(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
         {
             // Make sure that the user didn't sign in with a personal Microsoft account
             if (notification.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value == "9188040d-6c67-4c5b-b112-36a304b66dad")
@@ -79,7 +76,7 @@ namespace UserSync
             return Task.FromResult(0);
         }
 
-        private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
+        private Task OnAuthenticationFailedAsync(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
         {
             notification.HandleResponse();
             notification.Response.Redirect("/Home/Error");
