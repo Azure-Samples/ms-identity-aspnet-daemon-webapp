@@ -34,7 +34,7 @@ namespace UserSync.Controllers
 {
     public class AccountController : Controller
     {
-        private const string AdminConsentUrlFormat = "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
+        private const string adminConsentUrlFormat = "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
 
         // GET: Account
         public ActionResult Index()
@@ -79,7 +79,7 @@ namespace UserSync.Controllers
         public ActionResult RequestPermissions()
         {
             return new RedirectResult(
-                String.Format(AdminConsentUrlFormat,
+                String.Format(adminConsentUrlFormat,
                 ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value,
                 Startup.clientId,
                 HttpUtility.UrlEncode(Startup.redirectUri + "Account/GrantPermissions")));
