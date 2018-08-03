@@ -46,7 +46,7 @@ namespace UserSync.Controllers
         // of a database purely for purposes of simplifying the sample code.
         private static ConcurrentDictionary<string, List<MSGraphUser>> usersByTenant = new ConcurrentDictionary<string, List<MSGraphUser>>();
 
-        [System.Web.Http.Authorize]
+        [Authorize]
         public async Task GetAsync(string tenantId)
         {
             MSALCache appTokenCache = new MSALCache(Startup.clientId);
