@@ -23,19 +23,18 @@ SOFTWARE.
 */
 
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace UserSync.Models
 {
-    public class MsGraphUser
+    public class MSGraphUser
     {
         [JsonProperty(PropertyName = "@odata.type")]
         public string odataType { get; set; }
+
         [JsonProperty(PropertyName = "@odata.id")]
         public string odataId { get; set; }
+
         public List<string> businessPhones { get; set; }
         public string displayName { get; set; }
         public string givenName { get; set; }
@@ -53,6 +52,7 @@ namespace UserSync.Models
     {
         [JsonProperty(PropertyName = "@odata.context")]
         public string context { get; set; }
-        public List<MsGraphUser> value { get; set; }
+
+        public List<MSGraphUser> value { get; set; }
     }
 }

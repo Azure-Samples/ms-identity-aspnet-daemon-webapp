@@ -15,7 +15,7 @@ endpoint: AAD V2
 
 This sample application shows how to use the [Azure AD v2.0 endpoint](http://aka.ms/aadv2) to access the data of Microsoft business customers in a long-running, non-interactive process.  It uses the OAuth2 client credentials grant to acquire an access token, which can be used to call the [Microsoft Graph](https://graph.microsoft.io) and access organizational data.
 
-The app is built as an ASP.NET 4.5 MVC application, using the OWIN OpenID Connect middleware to sign in users.  Its "daemon" component is simply an API controller, which, when called, syncs a list of users from the customer's Azure AD tenant.  This `SyncController.cs` is triggered by an ajax call in the web application, and uses the preview Microsoft Authentication Library (MSAL) to acquire a token.
+The app is built as an ASP.NET 4.5 MVC application, using the OWIN OpenID Connect middleware to sign in users.  Its "daemon" component is simply an API controller, which, when called, syncs a list of users from the customer's Azure AD tenant.  This `SyncController.cs` is triggered by an ajax call in the web application, and uses the `Microsoft Authentication Library (MSAL) Preview for .NET` to acquire a token.
 
 ## Scenario
 
