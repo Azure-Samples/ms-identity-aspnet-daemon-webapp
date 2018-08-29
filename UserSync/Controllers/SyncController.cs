@@ -61,6 +61,7 @@ namespace UserSync.Controllers
             // Query for list of users in the tenant
             HttpClient client = new HttpClient();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, MSGraphQuery);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
             HttpResponseMessage response = await client.SendAsync(request);
 

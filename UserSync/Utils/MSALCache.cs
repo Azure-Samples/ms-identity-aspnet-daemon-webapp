@@ -51,7 +51,11 @@ namespace UserSync.Utils
         public void Load()
         {
             // Ideally, methods that load and persist should be thread safe.
-            this.cache.Deserialize((byte[])this.memoryCache.Get(this.cacheId));
+            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.cacheId);
+            if (tokenCacheBytes!=null)
+            {
+                this.cache.Deserialize(tokenCacheBytes);
+            }
         }
 
         public void Persist()
