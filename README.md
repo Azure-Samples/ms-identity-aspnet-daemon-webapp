@@ -11,7 +11,7 @@ endpoint: AAD V2
 
 ![Build Badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/33/badge)
 
-> For a simpler console daemon application See the following sample: [active-directory-dotnetcore-daemon-v2](https://github.com/Azure-Samples/active-directory-dotnetcore-daemon-v2)
+> For a simpler console daemon application, check out the following sample: [active-directory-dotnetcore-daemon-v2](https://github.com/Azure-Samples/active-directory-dotnetcore-daemon-v2)
 
 ## About this sample
 
