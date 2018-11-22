@@ -1,0 +1,13 @@
+﻿
+@{
+    ViewBag.Title = "Error";
+}
+
+@Html.Partial("Error")
+
+<h4 style="color:red">@ViewBag.ErrorMessage</h4>
+@if (ViewBag.SignIn != null)
+{
+    <h4>Click @Html.ActionLink("here", "SignIn", "Account", null, null) to re-authenticate.</h4>
+}
+

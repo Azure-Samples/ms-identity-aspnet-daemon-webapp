@@ -29,6 +29,7 @@ using System;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
+using UserSync.Utils;
 
 namespace UserSync.Controllers
 {
@@ -83,6 +84,31 @@ namespace UserSync.Controllers
                 ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value,
                 Startup.clientId,
                 HttpUtility.UrlEncode(Startup.redirectUri + "Account/GrantPermissions")));
+        }
+
+        /// <summary>
+        /// Called by Azure AD. Here we end the user's session, but don't redirect to AAD for sign out.
+        /// </summary>
+        public void EndSession()
+        {
+            this.RemoveCachedTokens();
+        }
+
+        public ActionResult SignOutCallback()
+        {
+            if (this.Request.IsAuthenticated)
+                return this.RedirectToAction("Index", "Home");
+
+            return this.View();
+        }
+
+        /// <summary>
+        /// Remove all cache entries for this user.
+        /// </summary>
+        private void RemoveCachedTokens()
+        {
+            MSALCache appTokenCache = new MSALCache(Startup.clientId);
+            appTokenCache.Clear();
         }
     }
 }
