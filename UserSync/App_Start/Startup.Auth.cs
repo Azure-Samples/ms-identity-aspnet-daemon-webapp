@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using System;
+using System.Configuration;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -36,8 +37,9 @@ namespace UserSync
 {
     public partial class Startup
     {
-        public static string clientId = "[Enter your client ID, as obtained from the app registration portal]";
-        public static string clientSecret = "[Enter your client secret, as obtained from the app registration portal]";
+        const string MSATenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
+        public static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
+        public static string clientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         private static string authority = "https://login.microsoftonline.com/common/v2.0";
         public static string redirectUri = "https://localhost:44316/";
 
@@ -48,26 +50,26 @@ namespace UserSync
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
-                                               {
-                                                   ClientId = clientId,
-                                                   Authority = authority,
-                                                   RedirectUri = redirectUri,
-                                                   PostLogoutRedirectUri = redirectUri,
-                                                   Scope = "openid profile",
-                                                   ResponseType = "id_token",
-                                                   TokenValidationParameters = new TokenValidationParameters { ValidateIssuer = false, NameClaimType = "name" },
-                                                   Notifications = new OpenIdConnectAuthenticationNotifications
-                                                                   {
-                                                                       AuthenticationFailed = this.OnAuthenticationFailedAsync,
-                                                                       SecurityTokenValidated = this.OnSecurityTokenValidatedAsync
-                                                                   }
-                                               });
+            {
+                ClientId = clientId,
+                Authority = authority,
+                RedirectUri = redirectUri,
+                PostLogoutRedirectUri = redirectUri,
+                Scope = "openid profile",
+                ResponseType = "id_token",
+                TokenValidationParameters = new TokenValidationParameters { ValidateIssuer = false, NameClaimType = "name" },
+                Notifications = new OpenIdConnectAuthenticationNotifications
+                {
+                    AuthenticationFailed = this.OnAuthenticationFailedAsync,
+                    SecurityTokenValidated = this.OnSecurityTokenValidatedAsync
+                }
+            });
         }
 
         private Task OnSecurityTokenValidatedAsync(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
         {
             // Make sure that the user didn't sign in with a personal Microsoft account
-            if (notification.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value == "9188040d-6c67-4c5b-b112-36a304b66dad")
+            if (notification.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value == MSATenantId)
             {
                 notification.HandleResponse();
                 notification.Response.Redirect("/Account/UserMismatch");
@@ -79,7 +81,7 @@ namespace UserSync
         private Task OnAuthenticationFailedAsync(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
         {
             notification.HandleResponse();
-            notification.Response.Redirect("/Home/Error");
+            notification.Response.Redirect("/Error/ShowError?signIn=true&errorMessage=" + notification.Exception.Message);
             return Task.FromResult(0);
         }
     }
