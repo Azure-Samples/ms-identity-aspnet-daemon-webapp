@@ -169,7 +169,7 @@ Function ConfigureApplications
    $clientAadApplication = New-AzureADApplication -DisplayName "dotnet-web-daemon-v2" `
                                                   -HomePage "https://localhost:44316/" `
                                                   -LogoutUrl "https://localhost:44316/Account/EndSession" `
-                                                  -ReplyUrls https://localhost:44316/, https://localhost:44316/Account/GrantPermissions `
+                                                  -ReplyUrls "https://localhost:44316/", "https://localhost:44316/Account/GrantPermissions" `
                                                   -IdentifierUris "https://$tenantName/dotnet-web-daemon-v2" `
                                                   -AvailableToOtherTenants $True `
                                                   -PasswordCredentials $key `
@@ -202,6 +202,7 @@ Function ConfigureApplications
                                                 -requiredApplicationPermissions "User.Read.All";
 
    $requiredResourcesAccess.Add($requiredPermissions)
+
 
    Set-AzureADApplication -ObjectId $clientAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
    Write-Host "Granted permissions."
