@@ -2,7 +2,7 @@
 services: active-directory
 platforms: dotnet
 author: jmprieur
-level: 400
+level: 300
 client: .NET Web App (MVC)
 service: Microsoft Graph
 endpoint: AAD v2.0
@@ -17,13 +17,13 @@ endpoint: AAD v2.0
 
 ### Overview
 
-This sample application shows how to use the [Azure AD v2.0 endpoint](http://aka.ms/aadv2) to access the data of Microsoft business customers in a long-running, non-interactive process.  It uses the OAuth2 client credentials grant to acquire an access token, which can be used to call the [Microsoft Graph](https://graph.microsoft.io) and access organizational data.
+This sample application shows how to use the [Azure AD v2.0 endpoint](http://aka.ms/aadv2) to access the data of Microsoft business customers in a long-running, non-interactive process.  It uses the [OAuth2 client credentials grant](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow) to acquire an access token, which it then uses to call the [Microsoft Graph](https://graph.microsoft.io) and access organizational data.
 
-The app is built as an ASP.NET 4.5 MVC application, using the OWIN OpenID Connect middleware to sign in users.  Its "daemon" component is simply an API controller, which, when called, syncs a list of users from the customer's Azure AD tenant.  This `SyncController.cs` is triggered by an ajax call in the web application, and uses the `Microsoft Authentication Library (MSAL) Preview for .NET` to acquire a token.
+The app is built as an ASP.NET MVC application, and uses  the OWIN OpenID Connect middleware to sign in users.  Its "daemon" component in this sample is just an API controller, which, when called, pulls in a list of users  in customer's Azure AD tenant from Microsoft Graph.  This `SyncController.cs` is triggered by an ajax call in the web application, and uses the `Microsoft Authentication Library (MSAL) Preview for .NET` to acquire a access token for Microsoft Graph.
 
 ## Scenario
 
-Because the app is a multi-tenant app intended for use by any Microsoft business customer, it must provide a way for customers to "sign up" or "connect" the application to their company data.  During the connect flow, a company administrator can grant **application permissions** directly to the app so that it can access company data in a non-interactive fashion, without the presence of a signed-in user.  The majority of the logic in this sample shows how to achieve this connect flow using the v2.0 **admin consent** endpoint.
+Because the app is a multi-tenant app intended for use by any Microsoft business customer, it must provide a way for customers to "sign up" or "connect" the application to their company data.  During the connect flow, a company administrator first grants **application permissions** directly to the app so that it can access company data in a non-interactive fashion, without the presence of a signed-in user.  The majority of the logic in this sample shows how to achieve this connect flow using the v2.0 **admin consent** endpoint.
 
 ![Topology](./ReadmeFiles/topology.png)
 
@@ -159,7 +159,7 @@ The relevant code for this sample is in the following files:
 
 ## Troubleshooting
 
-If you are repeatedly asked to Grant permissions. See the note in [SyncController](https://github.com/Azure-Samples/active-directory-dotnet-daemon-v2/blob/master/UserSync/Controllers/SyncController.cs) on how to clear your token cache.
+If you are repeatedly asked to Grant permissions, Sign-out and sign back in again to force a token cache refresh.
 
 ## Community Help and Support
 
@@ -183,7 +183,13 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 For more information, see MSAL.NET's conceptual documentation:
 
+- [Tenancy in Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/single-and-multi-tenant-apps)
+- [Understanding Azure AD application consent experiences](https://docs.microsoft.com/en-us/azure/active-directory/develop/application-consent-experience)
+- [How to: Sign in any Azure Active Directory user using the multi-tenant application pattern](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant)
+- [Understand user and admin consent](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant#understand-user-and-admin-consent)
+- [Application and service principal objects in Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals)
 - [Quickstart: Register an application with the Microsoft identity platform (Preview)](https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app)
+
 - [Quickstart: Configure a client application to access web APIs (Preview)](https://docs.microsoft.com/azure/active-directory/develop/quickstart-configure-app-access-web-apis)
 - [Acquiring a token for an application with client credential flows](https://aka.ms/msal-net-client-credentials)
 

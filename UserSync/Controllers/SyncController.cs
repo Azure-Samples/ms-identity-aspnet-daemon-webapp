@@ -49,13 +49,12 @@ namespace UserSync.Controllers
         [Authorize]
         public async Task GetAsync(string tenantId)
         {
-            MSALCache appTokenCache = new MSALCache(Startup.clientId);
+            MSALMemoryTokenCache tokenCacheHelper = new MSALMemoryTokenCache(Startup.clientId);
 
-            // Get a token for the Microsoft Graph. If this line throws an exception for
-            // any reason, we'll just let the exception be returned as a 500 response
+            // Get a token for the Microsoft Graph. If this line throws an exception for any reason, we'll just let the exception be returned as a 500 response
             // to the caller, and show a generic error message to the user.
             ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(Startup.clientId, string.Format(AuthorityFormat, tenantId), Startup.redirectUri,
-                                                                                           new ClientCredential(Startup.clientSecret), null, appTokenCache.GetMsalCacheInstance());
+                                                                                           new ClientCredential(Startup.clientSecret), tokenCacheHelper.GetMsalUserTokenCacheInstance(), tokenCacheHelper.GetMsalAppTokenCacheInstance());
             AuthenticationResult authResult = await daemonClient.AcquireTokenForClientAsync(new[] { MSGraphScope });
 
             // Query for list of users in the tenant
@@ -65,22 +64,16 @@ namespace UserSync.Controllers
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
             HttpResponseMessage response = await client.SendAsync(request);
 
-            // If the token we used was insufficient to make the query, drop the token from the cache.
-            // The Users page of the website will show a message to the user instructing them to grant
+            // If the token we used was insufficient to make the query, drop the token from the cache. The Users page of the website will show a message to the user instructing them to grant
             // permissions to the app (see User/Index.cshtml).
             if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                // BUG: Here, we should clear MSAL's app token cache to ensure that on a subsequent call
-                // to SyncController, MSAL does not return the same access token that resulted in this 403.
-                // By clearing the cache, MSAL will be forced to retrieve a new access token from AAD,
-                // which will contain the most up-to-date set of permissions granted to the app. Since MSAL
-                // currently does not provide a way to clear the app token cache, we have commented this line
-                // out. Thankfully, since this app uses the default in-memory app token cache, the app still
-                // works correctly, since the in-memory cache is not persistent across calls to SyncController
-                // anyway. If you build a persistent app token cache for MSAL, you should make sure to clear
+                // Here, we should clear MSAL's app token cache to ensure that on a subsequent call to SyncController, MSAL does not return the same access token that resulted in this 403.
+                // By clearing the cache, MSAL will be forced to retrieve a new access token from AAD, which will contain the most up-to-date set of permissions granted to the app. Since MSAL
+                // currently does not provide a way to clear the app token cache, we have commented this line out. Thankfully, since this app uses the default in-memory app token cache, the app still
+                // works correctly, since the in-memory cache is not persistent across calls to SyncController anyway. If you build a persistent app token cache for MSAL, you should make sure to clear
                 // it at this point in the code.
-                //
-                appTokenCache.Clear();
+                tokenCacheHelper.Clear();
             }
 
             if (!response.IsSuccessStatusCode)
