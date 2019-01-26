@@ -77,7 +77,8 @@ namespace UserSync.Controllers
             else if (admin_consent == "True" && tenant != null)
             {
                 // Do a full Sign-out, so that the logged in user can obtain a fresh token
-                return new RedirectResult("/SignOut");
+                string signOutUrl = Url.Action("SignOut", "Account", routeValues: null, protocol: Request.Url.Scheme);
+                return new RedirectResult(signOutUrl);
             }
 
             return View();

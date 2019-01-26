@@ -128,6 +128,7 @@ The application will then ask for permission to read the list of users in your t
 
 ![Admin Consent](./ReadmeFiles/adminconsent.PNG)
 
+You will be signed out from the app after granting permission. This is done to ensure that any existing access tokens for Graph is removed from the token cache. Once you sign in again, the  fresh token obtained will have the necessary permissions to make calls to MS Graph.
 When you grant the permission, the application will then be able to query for users at any point.  You can verify this by clicking the **Sync Users** button on the users page, refreshing the list of users.  Try adding or removing a user and resyncing the list (but note that it only syncs the first page of users!).
 
 ## About the code
@@ -156,10 +157,6 @@ The relevant code for this sample is in the following files:
 11. Add a new **Web API 2 Controller - Empty** called `SyncController`. Replace the implementation with the contents of the file of the same name from the sample.
 12. For the user interface, in the `Views\Account` folder, add three **Empty (without model) Views** named `GrantPermissions`, `Index` and `UserMismatch` and one named `Index` in the `Views\User` folder. Replace the implementation with the contents of the file of the same name from the sample.
 13. Update the `Shared\_Layout.cshtml` and `Home\Index.cshtml` to correctly link the various views together.
-
-## Troubleshooting
-
-If you are repeatedly asked to Grant permissions, Sign-out and sign back in again to force a token cache refresh.
 
 ## Community Help and Support
 

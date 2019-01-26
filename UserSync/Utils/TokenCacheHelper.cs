@@ -24,30 +24,33 @@ SOFTWARE.
 
 using Microsoft.Identity.Client;
 using System;
-using System.Runtime.Caching;
 using System.Security.Claims;
+using System.Threading;
+using System.Web;
 
 namespace UserSync.Utils
 {
     /// <summary>
-    /// An implementation of token cache for both Confidential and Public clients backed by MemoryCache.
-    /// MemoryCache is useful in Api scenarios where there is no HttpContext to cache data.
+    /// An implementation of token cache for both Confidential and Public clients backed by HttpContext Session
     /// </summary>
-    public class MSALMemoryTokenCache
+    public class TokenCacheHelper
     {
         private readonly string appId;
         private readonly string AppCacheId;
+        private readonly string UserCacheId;
 
-        private readonly MemoryCache memoryCache = MemoryCache.Default;
-        private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
-
+        private static ReaderWriterLockSlim SessionLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private HttpContextBase HttpContext = null;
+        
         private readonly TokenCache appTokenCache;
         private readonly TokenCache userTokenCache;
 
-        public MSALMemoryTokenCache(string clientId)
+        public TokenCacheHelper(string clientId, HttpContextBase httpcontext)
         {
             this.appId = clientId;
             this.AppCacheId = this.appId + "_AppTokenCache";
+            this.UserCacheId = this.appId + "_UserTokenCache_";
+            this.HttpContext = httpcontext;
 
             if (this.appTokenCache == null)
             {
@@ -63,51 +66,44 @@ namespace UserSync.Utils
                 this.userTokenCache.SetAfterAccess(this.UserTokenCacheAfterAccessNotification);
             }
 
-            this.LoadAppTokenCacheFromMemory();
-            this.LoadUserTokenCacheFromMemory();
+            this.LoadAppTokenCache();
+            this.LoadUserTokenCache();
         }
 
-        public void LoadAppTokenCacheFromMemory()
+        public void LoadAppTokenCache()
         {
-            // Ideally, methods that load and persist should be thread safe. MemoryCache.Get() is thread safe.
-            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.AppCacheId);
-            if (tokenCacheBytes != null)
-            {
-                this.appTokenCache.Deserialize(tokenCacheBytes);
-            }
+            SessionLock.EnterReadLock();
+            this.appTokenCache.Deserialize((byte[])this.HttpContext.Session[this.AppCacheId]);
+            SessionLock.ExitReadLock();
         }
 
-        public void LoadUserTokenCacheFromMemory()
+        public void LoadUserTokenCache()
         {
-            // Ideally, methods that load and persist should be thread safe. MemoryCache.Get() is thread safe.
-            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.GetSignedInUsersCacheKey());
-            if (tokenCacheBytes != null)
-            {
-                this.userTokenCache.Deserialize(tokenCacheBytes);
-            }
+            SessionLock.EnterReadLock();
+            this.userTokenCache.Deserialize((byte[])this.HttpContext.Session[this.GetSignedInUsersCacheKey()]);
+            SessionLock.ExitReadLock();
         }
 
         public void PersistAppTokenCache()
         {
-            // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
-            // Reflect changes in the persistent store
-            this.memoryCache.Set(this.AppCacheId, this.appTokenCache.Serialize(), this.cacheDuration);
+            SessionLock.EnterWriteLock();
+            this.HttpContext.Session[this.AppCacheId] = this.appTokenCache.Serialize();
+            SessionLock.ExitWriteLock();
         }
 
         public void PersistUserTokenCache()
         {
-            // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
-            this.memoryCache.Set(this.GetSignedInUsersCacheKey(), this.userTokenCache.Serialize(), this.cacheDuration);
+            SessionLock.EnterWriteLock();
+            this.HttpContext.Session[this.GetSignedInUsersCacheKey()] = this.userTokenCache.Serialize();
+            SessionLock.ExitWriteLock();
         }
 
         public void Clear()
         {
-            this.memoryCache.Remove(this.AppCacheId);
-            this.memoryCache.Remove(this.GetSignedInUsersCacheKey());
-
-            // Nulls the currently deserialized instance
-            this.LoadAppTokenCacheFromMemory();
-            this.LoadUserTokenCacheFromMemory();
+            SessionLock.EnterWriteLock();
+            this.HttpContext.Session.Remove(this.GetSignedInUsersCacheKey());
+            this.HttpContext.Session.Remove(this.AppCacheId);
+            SessionLock.ExitWriteLock();
         }
 
         /// <summary>
@@ -116,7 +112,7 @@ namespace UserSync.Utils
         /// <param name="args">Contains parameters used by the MSAL call accessing the cache.</param>
         private void AppTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            this.LoadAppTokenCacheFromMemory();
+            this.LoadAppTokenCache();
         }
 
         /// <summary>
@@ -134,7 +130,7 @@ namespace UserSync.Utils
 
         private void UserTokenCacheAfterAccessNotification(TokenCacheNotificationArgs args)
         {
-            this.LoadUserTokenCacheFromMemory();
+            this.LoadUserTokenCache();
         }
 
         private void UserTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
@@ -148,13 +144,13 @@ namespace UserSync.Utils
 
         public TokenCache GetMsalAppTokenCacheInstance()
         {
-            this.LoadAppTokenCacheFromMemory();
+            this.LoadAppTokenCache();
             return this.appTokenCache;
         }
 
         public TokenCache GetMsalUserTokenCacheInstance()
         {
-            this.LoadUserTokenCacheFromMemory();
+            this.LoadUserTokenCache();
             return this.userTokenCache;
         }
 
@@ -167,7 +163,7 @@ namespace UserSync.Utils
             {
                 signedInUsersId = ClaimsPrincipal.Current.FindFirst(objectIdClaimType)?.Value;
             }
-            return $"{this.appId}_UserTokenCache_{signedInUsersId}";
+            return $"{this.UserCacheId}{signedInUsersId}";
         }
     }
 }
