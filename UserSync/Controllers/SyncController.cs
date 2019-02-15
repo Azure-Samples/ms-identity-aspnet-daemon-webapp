@@ -43,19 +43,21 @@ namespace UserSync.Controllers
         private const string MSGraphScope = "https://graph.microsoft.com/.default";
         private const string MSGraphQuery = "https://graph.microsoft.com/v1.0/users";
 
-        // Not a good idea.  We're using an in-memory data store in this sample instead
-        // of a database purely for purposes of simplifying the sample code.
         private static ConcurrentDictionary<string, List<MSGraphUser>> usersByTenant = new ConcurrentDictionary<string, List<MSGraphUser>>();
 
         [Authorize]
         public async Task GetAsync(string tenantId)
         {
-            MSALMemoryTokenCache tokenCacheHelper = new MSALMemoryTokenCache(Startup.clientId);
+            MSALAppTokenMemoryCache appTokenCache = new MSALAppTokenMemoryCache(Startup.clientId);
+            MSALUserTokenMemoryCache userTokenCache = new MSALUserTokenMemoryCache(Startup.clientId);
 
             // Get a token for the Microsoft Graph. If this line throws an exception for any reason, we'll just let the exception be returned as a 500 response
             // to the caller, and show a generic error message to the user.
             ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(Startup.clientId, string.Format(AuthorityFormat, tenantId), Startup.redirectUri,
-                                                                                           new ClientCredential(Startup.clientSecret), tokenCacheHelper.GetMsalUserTokenCacheInstance(), tokenCacheHelper.GetMsalAppTokenCacheInstance());
+                                                                                           new ClientCredential(Startup.clientSecret), 
+                                                                                           userTokenCache.GetMsalUserTokenCacheInstance(), 
+                                                                                           appTokenCache.GetMsalAppTokenCacheInstance());
+
             AuthenticationResult authResult = await daemonClient.AcquireTokenForClientAsync(new[] { MSGraphScope });
 
             // Query for list of users in the tenant
@@ -74,7 +76,7 @@ namespace UserSync.Controllers
                 // currently does not provide a way to clear the app token cache, we have commented this line out. Thankfully, since this app uses the default in-memory app token cache, the app still
                 // works correctly, since the in-memory cache is not persistent across calls to SyncController anyway. If you build a persistent app token cache for MSAL, you should make sure to clear
                 // it at this point in the code.
-                tokenCacheHelper.Clear();
+                appTokenCache.Clear();
             }
 
             if (!response.IsSuccessStatusCode)

@@ -33,29 +33,17 @@ namespace UserSync.Utils
     /// An implementation of token cache for both Confidential and Public clients backed by MemoryCache.
     /// MemoryCache is useful in Api scenarios where there is no HttpContext to cache data.
     /// </summary>
-    public class MSALMemoryTokenCache
+    public class MSALUserTokenMemoryCache
     {
         private readonly string appId;
-        private readonly string AppCacheId;
-
         private readonly MemoryCache memoryCache = MemoryCache.Default;
         private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
 
-        private readonly TokenCache appTokenCache;
         private readonly TokenCache userTokenCache;
 
-        public MSALMemoryTokenCache(string clientId)
+        public MSALUserTokenMemoryCache(string clientId)
         {
             this.appId = clientId;
-            this.AppCacheId = this.appId + "_AppTokenCache";
-
-            if (this.appTokenCache == null)
-            {
-                this.appTokenCache = new TokenCache();
-                this.appTokenCache.SetBeforeAccess(this.AppTokenCacheBeforeAccessNotification);
-                this.appTokenCache.SetAfterAccess(this.AppTokenCacheAfterAccessNotification);
-            }
-
             if (this.userTokenCache == null)
             {
                 this.userTokenCache = new TokenCache();
@@ -63,18 +51,7 @@ namespace UserSync.Utils
                 this.userTokenCache.SetAfterAccess(this.UserTokenCacheAfterAccessNotification);
             }
 
-            this.LoadAppTokenCacheFromMemory();
             this.LoadUserTokenCacheFromMemory();
-        }
-
-        public void LoadAppTokenCacheFromMemory()
-        {
-            // Ideally, methods that load and persist should be thread safe. MemoryCache.Get() is thread safe.
-            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.AppCacheId);
-            if (tokenCacheBytes != null)
-            {
-                this.appTokenCache.Deserialize(tokenCacheBytes);
-            }
         }
 
         public void LoadUserTokenCacheFromMemory()
@@ -87,13 +64,6 @@ namespace UserSync.Utils
             }
         }
 
-        public void PersistAppTokenCache()
-        {
-            // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
-            // Reflect changes in the persistent store
-            this.memoryCache.Set(this.AppCacheId, this.appTokenCache.Serialize(), this.cacheDuration);
-        }
-
         public void PersistUserTokenCache()
         {
             // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
@@ -102,34 +72,10 @@ namespace UserSync.Utils
 
         public void Clear()
         {
-            this.memoryCache.Remove(this.AppCacheId);
             this.memoryCache.Remove(this.GetSignedInUsersCacheKey());
 
             // Nulls the currently deserialized instance
-            this.LoadAppTokenCacheFromMemory();
             this.LoadUserTokenCacheFromMemory();
-        }
-
-        /// <summary>
-        /// Triggered right before MSAL needs to access the cache. Reload the cache from the persistent store in case it changed since the last access.
-        /// </summary>
-        /// <param name="args">Contains parameters used by the MSAL call accessing the cache.</param>
-        private void AppTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
-        {
-            this.LoadAppTokenCacheFromMemory();
-        }
-
-        /// <summary>
-        /// Triggered right after MSAL accessed the cache.
-        /// </summary>
-        /// <param name="args">Contains parameters used by the MSAL call accessing the cache.</param>
-        private void AppTokenCacheAfterAccessNotification(TokenCacheNotificationArgs args)
-        {
-            // if the access operation resulted in a cache update
-            if (args.HasStateChanged)
-            {
-                this.PersistAppTokenCache();
-            }
         }
 
         private void UserTokenCacheAfterAccessNotification(TokenCacheNotificationArgs args)
@@ -144,12 +90,6 @@ namespace UserSync.Utils
             {
                 this.PersistUserTokenCache();
             }
-        }
-
-        public TokenCache GetMsalAppTokenCacheInstance()
-        {
-            this.LoadAppTokenCacheFromMemory();
-            return this.appTokenCache;
         }
 
         public TokenCache GetMsalUserTokenCacheInstance()

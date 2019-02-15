@@ -50,7 +50,7 @@ namespace UserSync.Controllers
 
         public void SignOut()
         {
-            this.RemoveCachedTokens();
+            this.RemovedCachedTokensForApp();
             string callbackUrl = Url.Action("SignOutCallback", "Account", routeValues: null, protocol: Request.Url.Scheme);
 
             HttpContext.GetOwinContext().Authentication.SignOut(
@@ -69,7 +69,7 @@ namespace UserSync.Controllers
             // If there was an error getting permissions from the admin. ask for permissions again
             if (error != null)
             {
-                this.RemoveCachedTokens();
+                this.RemovedCachedTokensForApp();
                 ViewBag.ErrorDescription = error_description;
             }
 
@@ -99,7 +99,7 @@ namespace UserSync.Controllers
         /// </summary>
         public void EndSession()
         {
-            this.RemoveCachedTokens();
+            this.RemovedCachedTokensForApp();
             HttpContext.GetOwinContext().Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
         }
 
@@ -112,11 +112,12 @@ namespace UserSync.Controllers
         }
 
         /// <summary>
-        /// Remove all cache entries for this user.
+        /// Clears all cached tokens obtained and cached for the app itself. 
+        /// If you have scenarios like on-behalf-of which results in the user token cache caching tokens for users as well, that'd be cleared up here as well
         /// </summary>
-        private void RemoveCachedTokens()
+        private void RemovedCachedTokensForApp()
         {
-            MSALMemoryTokenCache appTokenCache = new MSALMemoryTokenCache(Startup.clientId);
+            MSALAppTokenMemoryCache appTokenCache = new MSALAppTokenMemoryCache(Startup.clientId);
             appTokenCache.Clear();
         }
     }
