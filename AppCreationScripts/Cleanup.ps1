@@ -5,6 +5,9 @@ param(
     [string] $tenantId
 )
 
+if ((Get-Module -ListAvailable -Name "AzureAD") -eq $null) { 
+    Install-Module "AzureAD" -Scope CurrentUser 
+} 
 Import-Module AzureAD
 $ErrorActionPreference = 'Stop'
 
@@ -47,7 +50,8 @@ This function removes the Azure AD applications for the sample. These applicatio
     Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
     Write-Host "Removing 'client' (dotnet-web-daemon-v2) if needed"
-    $app=Get-AzureADApplication -Filter "identifierUris/any(uri:uri eq 'https://$tenantName/dotnet-web-daemon-v2')"  
+    $app=Get-AzureADApplication -Filter "DisplayName eq 'dotnet-web-daemon-v2'"  
+
     if ($app)
     {
         Remove-AzureADApplication -ObjectId $app.ObjectId

@@ -1,0 +1,37 @@
+{
+  /*
+  This section describes the Azure AD  Applications to configure, and their dependencies
+  */
+
+  "Sample": {
+    "Title": "Build a multi-tenant daemon with the Azure AD v2.0 endpoint",
+    "Level": 300,
+    "Client": ".NET Web App (MVC)"
+  },
+  "AppRegistrations": [
+    {
+      "x-ms-id": "active-directory-dotnet-daemon-v2",
+      "x-ms-name": "active-directory-dotnet-daemon-v2",
+      "x-ms-version": "2.0",
+      "replyUrlsWithType": [
+        {
+          "url": "urn:ietf:wg:oauth:2.0:oob",
+          "type": "InstalledClient"
+        }
+      ],
+      "requiredResourceAccess": [
+        {
+          "x-ms-resourceAppName": "Microsoft Graph",
+          "resourceAppId": "00000003-0000-0000-c000-000000000000",
+          "resourceAccess": [
+            {
+              "id": "e1fe6dd8-ba31-4d61-89e7-88639da4683d",
+              "type": "Scope",
+              "x-ms-name": "user.read"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

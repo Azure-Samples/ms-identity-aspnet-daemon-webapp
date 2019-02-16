@@ -1,7 +1,7 @@
 {
   "Sample": {
     "Title": "Build a multi-tenant daemon with the Azure AD v2.0 endpoint",
-    "Level": 400,
+    "Level": 300,
     "Client": ".NET Web App (MVC)",
     "Service": "Microsoft Graph",
     "RepositoryUrl": "active-directory-dotnet-daemon-v2",

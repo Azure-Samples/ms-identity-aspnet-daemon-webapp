@@ -48,10 +48,14 @@ namespace UserSync.Controllers
             HttpContext.GetOwinContext().Authentication.Challenge(new AuthenticationProperties { RedirectUri = "/User" }, OpenIdConnectAuthenticationDefaults.AuthenticationType);
         }
 
-        public ActionResult SignOut()
+        public void SignOut()
         {
-            HttpContext.GetOwinContext().Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
-            return new RedirectResult("/");
+            this.RemovedCachedTokensForApp();
+            string callbackUrl = Url.Action("SignOutCallback", "Account", routeValues: null, protocol: Request.Url.Scheme);
+
+            HttpContext.GetOwinContext().Authentication.SignOut(
+                new AuthenticationProperties { RedirectUri = callbackUrl },
+                OpenIdConnectAuthenticationDefaults.AuthenticationType, CookieAuthenticationDefaults.AuthenticationType);
         }
 
         public ActionResult UserMismatch()
@@ -65,12 +69,16 @@ namespace UserSync.Controllers
             // If there was an error getting permissions from the admin. ask for permissions again
             if (error != null)
             {
+                this.RemovedCachedTokensForApp();
                 ViewBag.ErrorDescription = error_description;
             }
+
             // If the admin successfully granted permissions, continue to showing the list of users
             else if (admin_consent == "True" && tenant != null)
             {
-                return new RedirectResult("/User");
+                // Do a full Sign-out, so that the logged in user can obtain a fresh token
+                string signOutUrl = Url.Action("SignOut", "Account", routeValues: null, protocol: Request.Url.Scheme);
+                return new RedirectResult(signOutUrl);
             }
 
             return View();
@@ -91,7 +99,8 @@ namespace UserSync.Controllers
         /// </summary>
         public void EndSession()
         {
-            this.RemoveCachedTokens();
+            this.RemovedCachedTokensForApp();
+            HttpContext.GetOwinContext().Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
         }
 
         public ActionResult SignOutCallback()
@@ -103,11 +112,12 @@ namespace UserSync.Controllers
         }
 
         /// <summary>
-        /// Remove all cache entries for this user.
+        /// Clears all cached tokens obtained and cached for the app itself. 
+        /// If you have scenarios like on-behalf-of which results in the user token cache caching tokens for users as well, that'd be cleared up here as well
         /// </summary>
-        private void RemoveCachedTokens()
+        private void RemovedCachedTokensForApp()
         {
-            MSALCache appTokenCache = new MSALCache(Startup.clientId);
+            MSALAppTokenMemoryCache appTokenCache = new MSALAppTokenMemoryCache(Startup.clientId);
             appTokenCache.Clear();
         }
     }
