@@ -117,7 +117,7 @@ namespace UserSync.Controllers
         /// </summary>
         private void RemovedCachedTokensForApp()
         {
-            MSALAppTokenMemoryCache appTokenCache = new MSALAppTokenMemoryCache(Startup.clientId);
+            MSALAppTokenMemoryCache appTokenCache = new MSALAppTokenMemoryCache(Startup.clientId, null);
             appTokenCache.Clear();
         }
     }
