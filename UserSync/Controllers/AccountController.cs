@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Microsoft.Identity.Client;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
@@ -35,6 +36,7 @@ namespace UserSync.Controllers
 {
     public class AccountController : Controller
     {
+        private const string AuthorityFormat = "https://login.microsoftonline.com/{0}/v2.0";
         private const string adminConsentUrlFormat = "https://login.microsoftonline.com/{0}/adminconsent?client_id={1}&redirect_uri={2}";
 
         // GET: Account
@@ -117,8 +119,22 @@ namespace UserSync.Controllers
         /// </summary>
         private void RemovedCachedTokensForApp()
         {
-            MSALAppTokenMemoryCache appTokenCache = new MSALAppTokenMemoryCache(Startup.clientId, null);
-            appTokenCache.Clear();
+            string tenantId = ClaimsPrincipal.Current?.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid")?.Value;
+
+            if(string.IsNullOrEmpty(tenantId))
+            {
+                return;
+            }
+
+            IConfidentialClientApplication daemonClient;
+            daemonClient = ConfidentialClientApplicationBuilder.Create(Startup.clientId)
+                .WithAuthority(string.Format(AuthorityFormat, tenantId))
+                .WithRedirectUri(Startup.redirectUri)
+                .WithClientSecret(Startup.clientSecret)
+                .Build();
+
+            var serializedUserTokenCache = new MSALUserTokenMemoryCache(Startup.clientId, daemonClient.UserTokenCache);
+            serializedUserTokenCache.Clear();
         }
     }
 }
