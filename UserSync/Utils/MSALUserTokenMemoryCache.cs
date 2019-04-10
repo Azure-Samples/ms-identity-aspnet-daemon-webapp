@@ -39,14 +39,14 @@ namespace UserSync.Utils
         private readonly MemoryCache memoryCache = MemoryCache.Default;
         private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
 
-        private readonly TokenCache userTokenCache;
+        private readonly ITokenCache userTokenCache;
 
-        public MSALUserTokenMemoryCache(string clientId)
+        public MSALUserTokenMemoryCache(string clientId, ITokenCache userTokenCache)
         {
             this.appId = clientId;
             if (this.userTokenCache == null)
             {
-                this.userTokenCache = new TokenCache();
+                this.userTokenCache = userTokenCache;
                 this.userTokenCache.SetBeforeAccess(this.UserTokenCacheBeforeAccessNotification);
                 this.userTokenCache.SetAfterAccess(this.UserTokenCacheAfterAccessNotification);
             }
@@ -60,14 +60,14 @@ namespace UserSync.Utils
             byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.GetSignedInUsersCacheKey());
             if (tokenCacheBytes != null)
             {
-                this.userTokenCache.Deserialize(tokenCacheBytes);
+                this.userTokenCache.DeserializeMsalV3(tokenCacheBytes);
             }
         }
 
         public void PersistUserTokenCache()
         {
             // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
-            this.memoryCache.Set(this.GetSignedInUsersCacheKey(), this.userTokenCache.Serialize(), this.cacheDuration);
+            this.memoryCache.Set(this.GetSignedInUsersCacheKey(), this.userTokenCache.SerializeMsalV3(), this.cacheDuration);
         }
 
         public void Clear()
@@ -90,12 +90,6 @@ namespace UserSync.Utils
             {
                 this.PersistUserTokenCache();
             }
-        }
-
-        public TokenCache GetMsalUserTokenCacheInstance()
-        {
-            this.LoadUserTokenCacheFromMemory();
-            return this.userTokenCache;
         }
 
         public string GetSignedInUsersCacheKey()

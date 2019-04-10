@@ -39,15 +39,15 @@ namespace UserSync.Utils
         private readonly MemoryCache memoryCache = MemoryCache.Default;
         private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
 
-        private readonly TokenCache appTokenCache;
+        private readonly ITokenCache appTokenCache;
 
-        public MSALAppTokenMemoryCache(string clientId)
+        public MSALAppTokenMemoryCache(string clientId, ITokenCache appTokenCache)
         {
             this.AppCacheId = clientId + "_AppTokenCache";
 
             if (this.appTokenCache == null)
             {
-                this.appTokenCache = new TokenCache();
+                this.appTokenCache = appTokenCache;
                 this.appTokenCache.SetBeforeAccess(this.AppTokenCacheBeforeAccessNotification);
                 this.appTokenCache.SetAfterAccess(this.AppTokenCacheAfterAccessNotification);
             }
@@ -61,7 +61,7 @@ namespace UserSync.Utils
             byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.AppCacheId);
             if (tokenCacheBytes != null)
             {
-                this.appTokenCache.Deserialize(tokenCacheBytes);
+                this.appTokenCache.DeserializeMsalV3(tokenCacheBytes);
             }
         }
 
@@ -69,7 +69,7 @@ namespace UserSync.Utils
         {
             // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
             // Reflect changes in the persistent store
-            this.memoryCache.Set(this.AppCacheId, this.appTokenCache.Serialize(), this.cacheDuration);
+            this.memoryCache.Set(this.AppCacheId, this.appTokenCache.SerializeMsalV3(), this.cacheDuration);
         }
 
         public void Clear()
@@ -100,12 +100,6 @@ namespace UserSync.Utils
             {
                 this.PersistAppTokenCache();
             }
-        }
-
-        public TokenCache GetMsalAppTokenCacheInstance()
-        {
-            this.LoadAppTokenCacheFromMemory();
-            return this.appTokenCache;
         }
     }
 }
