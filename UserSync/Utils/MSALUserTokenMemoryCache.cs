@@ -80,16 +80,16 @@ namespace UserSync.Utils
 
         private void UserTokenCacheAfterAccessNotification(TokenCacheNotificationArgs args)
         {
-            this.LoadUserTokenCacheFromMemory();
-        }
+			// if the access operation resulted in a cache update
+			if (args.HasStateChanged)
+			{
+				this.PersistUserTokenCache();
+			}
+		}
 
         private void UserTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            // if the access operation resulted in a cache update
-            if (args.HasStateChanged)
-            {
-                this.PersistUserTokenCache();
-            }
+			this.LoadUserTokenCacheFromMemory();
         }
 
         public string GetSignedInUsersCacheKey()
