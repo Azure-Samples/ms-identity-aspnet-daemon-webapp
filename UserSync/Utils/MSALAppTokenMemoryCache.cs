@@ -39,45 +39,17 @@ namespace UserSync.Utils
         private readonly MemoryCache memoryCache = MemoryCache.Default;
         private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
 
-        private readonly ITokenCache appTokenCache;
-
         public MSALAppTokenMemoryCache(string clientId, ITokenCache appTokenCache)
         {
             this.AppCacheId = clientId + "_AppTokenCache";
 
-            if (this.appTokenCache == null)
-            {
-                this.appTokenCache = appTokenCache;
-                this.appTokenCache.SetBeforeAccess(this.AppTokenCacheBeforeAccessNotification);
-                this.appTokenCache.SetAfterAccess(this.AppTokenCacheAfterAccessNotification);
-            }
-
-            this.LoadAppTokenCacheFromMemory();
-        }
-
-        public void LoadAppTokenCacheFromMemory()
-        {
-            // Ideally, methods that load and persist should be thread safe. MemoryCache.Get() is thread safe.
-            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.AppCacheId);
-            if (tokenCacheBytes != null)
-            {
-                this.appTokenCache.DeserializeMsalV3(tokenCacheBytes);
-            }
-        }
-
-        public void PersistAppTokenCache()
-        {
-            // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
-            // Reflect changes in the persistent store
-            this.memoryCache.Set(this.AppCacheId, this.appTokenCache.SerializeMsalV3(), this.cacheDuration);
+            appTokenCache.SetBeforeAccess(AppTokenCacheBeforeAccessNotification);
+            appTokenCache.SetAfterAccess(AppTokenCacheAfterAccessNotification);
         }
 
         public void Clear()
         {
             this.memoryCache.Remove(this.AppCacheId);
-
-            // Nulls the currently deserialized instance
-            this.LoadAppTokenCacheFromMemory();
         }
 
         /// <summary>
@@ -86,7 +58,11 @@ namespace UserSync.Utils
         /// <param name="args">Contains parameters used by the MSAL call accessing the cache.</param>
         private void AppTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            this.LoadAppTokenCacheFromMemory();
+            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.AppCacheId);
+            if (tokenCacheBytes != null)
+            {
+                args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: true);
+            }
         }
 
         /// <summary>
@@ -98,7 +74,8 @@ namespace UserSync.Utils
             // if the access operation resulted in a cache update
             if (args.HasStateChanged)
             {
-                this.PersistAppTokenCache();
+                // Reflect changes in the persistent store
+                this.memoryCache.Set(AppCacheId, args.TokenCache.SerializeMsalV3(), cacheDuration);
             }
         }
     }
