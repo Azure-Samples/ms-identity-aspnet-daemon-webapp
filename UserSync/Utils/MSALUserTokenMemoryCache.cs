@@ -39,57 +39,47 @@ namespace UserSync.Utils
         private readonly MemoryCache memoryCache = MemoryCache.Default;
         private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
 
-        private readonly ITokenCache userTokenCache;
-
         public MSALUserTokenMemoryCache(string clientId, ITokenCache userTokenCache)
         {
             this.appId = clientId;
-            if (this.userTokenCache == null)
-            {
-                this.userTokenCache = userTokenCache;
-                this.userTokenCache.SetBeforeAccess(this.UserTokenCacheBeforeAccessNotification);
-                this.userTokenCache.SetAfterAccess(this.UserTokenCacheAfterAccessNotification);
-            }
 
-            this.LoadUserTokenCacheFromMemory();
+            userTokenCache.SetBeforeAccess(this.UserTokenCacheBeforeAccessNotification);
+            userTokenCache.SetAfterAccess(this.UserTokenCacheAfterAccessNotification);
         }
 
-        public void LoadUserTokenCacheFromMemory()
+        public void LoadUserTokenCacheFromMemory(TokenCacheNotificationArgs args)
         {
             // Ideally, methods that load and persist should be thread safe. MemoryCache.Get() is thread safe.
             byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.GetSignedInUsersCacheKey());
             if (tokenCacheBytes != null)
             {
-                this.userTokenCache.DeserializeMsalV3(tokenCacheBytes);
+                args.TokenCache.DeserializeMsalV3(tokenCacheBytes);
             }
         }
 
-        public void PersistUserTokenCache()
+        public void PersistUserTokenCache(TokenCacheNotificationArgs args)
         {
             // Ideally, methods that load and persist should be thread safe.MemoryCache.Get() is thread safe.
-            this.memoryCache.Set(this.GetSignedInUsersCacheKey(), this.userTokenCache.SerializeMsalV3(), this.cacheDuration);
+            this.memoryCache.Set(this.GetSignedInUsersCacheKey(), args.TokenCache.SerializeMsalV3(), this.cacheDuration);
         }
 
         public void Clear()
         {
             this.memoryCache.Remove(this.GetSignedInUsersCacheKey());
-
-            // Nulls the currently deserialized instance
-            this.LoadUserTokenCacheFromMemory();
         }
 
         private void UserTokenCacheAfterAccessNotification(TokenCacheNotificationArgs args)
         {
-			// if the access operation resulted in a cache update
-			if (args.HasStateChanged)
-			{
-				this.PersistUserTokenCache();
-			}
-		}
+            // if the access operation resulted in a cache update
+            if (args.HasStateChanged)
+            {
+                this.PersistUserTokenCache(args);
+            }
+        }
 
         private void UserTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-			this.LoadUserTokenCacheFromMemory();
+            this.LoadUserTokenCacheFromMemory(args);
         }
 
         public string GetSignedInUsersCacheKey()
