@@ -1,12 +1,18 @@
 ---
-services: active-directory
-platforms: dotnet
-author: jmprieur
-level: 300
-client: .NET Web App (MVC)
-service: Microsoft Graph
-endpoint: AAD v2.0
+languages:
+- csharp
+- powershell
+- javascript
+- html
+page_type: sample
+description: "Use the Azure AD v2.0 endpoint to access the data of Microsoft business customers in a long-running, non-interactive process."
+products:
+- azure
+- azure-active-directory
+- dotnet
+urlFragment: build-multi-tenant-daemon-aad
 ---
+
 # Build a multi-tenant daemon with the Azure AD v2.0 endpoint
 
 ![Build Badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/33/badge)
