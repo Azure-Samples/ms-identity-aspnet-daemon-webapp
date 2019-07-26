@@ -33,7 +33,7 @@ Because the app is a multi-tenant app intended for use by any Microsoft business
 
 ![Topology](./ReadmeFiles/topology.png)
 
-For more information on the concepts used in this sample, be sure to read the [v2.0 endpoint client credentials protocol documentation](https://azure.microsoft.com/documentation/articles/active-directory-v2-protocols-oauth-client-creds).
+For more information on the concepts used in this sample, be sure to read the [v2.0 endpoint client credentials protocol documentation](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow).
 
 > Looking for previous versions of this code sample? Check out the tags on the [releases](../../releases) GitHub page.
 
