@@ -132,9 +132,6 @@ namespace UserSync.Controllers
                 .WithRedirectUri(Startup.redirectUri)
                 .WithClientSecret(Startup.clientSecret)
                 .Build();
-
-            var serializedUserTokenCache = new MSALUserTokenMemoryCache(Startup.clientId, daemonClient.UserTokenCache);
-            serializedUserTokenCache.Clear();
         }
     }
 }
