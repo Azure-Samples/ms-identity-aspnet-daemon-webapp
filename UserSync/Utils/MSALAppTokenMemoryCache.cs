@@ -34,22 +34,18 @@ namespace UserSync.Utils
     /// </summary>
     public class MSALAppTokenMemoryCache
     {
-        private readonly string AppCacheId;
-
         private readonly MemoryCache memoryCache = MemoryCache.Default;
         private readonly DateTimeOffset cacheDuration = DateTimeOffset.Now.AddHours(12);
 
-        public MSALAppTokenMemoryCache(string clientId, ITokenCache appTokenCache)
+        public MSALAppTokenMemoryCache(ITokenCache appTokenCache)
         {
-            this.AppCacheId = clientId + "_AppTokenCache";
-
             appTokenCache.SetBeforeAccess(AppTokenCacheBeforeAccessNotification);
             appTokenCache.SetAfterAccess(AppTokenCacheAfterAccessNotification);
         }
 
-        public void Clear()
+        public void Clear(string cacheKey)
         {
-            this.memoryCache.Remove(this.AppCacheId);
+            memoryCache.Remove(cacheKey);
         }
 
         /// <summary>
@@ -58,7 +54,7 @@ namespace UserSync.Utils
         /// <param name="args">Contains parameters used by the MSAL call accessing the cache.</param>
         private void AppTokenCacheBeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            byte[] tokenCacheBytes = (byte[])this.memoryCache.Get(this.AppCacheId);
+            byte[] tokenCacheBytes = (byte[])memoryCache.Get(args.SuggestedCacheKey);
             if (tokenCacheBytes != null)
             {
                 args.TokenCache.DeserializeMsalV3(tokenCacheBytes, shouldClearExistingCache: true);
@@ -74,8 +70,15 @@ namespace UserSync.Utils
             // if the access operation resulted in a cache update
             if (args.HasStateChanged)
             {
-                // Reflect changes in the persistent store
-                this.memoryCache.Set(AppCacheId, args.TokenCache.SerializeMsalV3(), cacheDuration);
+                if (args.HasTokens)
+                {
+                    // Reflect changes in the persistent store
+                    memoryCache.Set(args.SuggestedCacheKey, args.TokenCache.SerializeMsalV3(), cacheDuration);
+                }
+                else
+                {
+                    memoryCache.Remove(args.SuggestedCacheKey);
+                }
             }
         }
     }

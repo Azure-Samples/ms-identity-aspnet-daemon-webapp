@@ -59,8 +59,8 @@ namespace UserSync.Controllers
                 .WithClientSecret(Startup.clientSecret)
                 .Build();
 
-            var serializedAppTokenCache = new MSALAppTokenMemoryCache(Startup.clientId, daemonClient.AppTokenCache);
-            var serializedUserTokenCache = new MSALUserTokenMemoryCache(Startup.clientId, daemonClient.UserTokenCache);
+            var serializedAppTokenCache = new MSALAppTokenMemoryCache(daemonClient.AppTokenCache);
+            var serializedUserTokenCache = new MSALUserTokenMemoryCache(daemonClient.UserTokenCache);
 
             AuthenticationResult authResult = await daemonClient.AcquireTokenForClient(new[] { MSGraphScope })
                 .ExecuteAsync();
@@ -81,7 +81,7 @@ namespace UserSync.Controllers
                 // currently does not provide a way to clear the app token cache, we have commented this line out. Thankfully, since this app uses the default in-memory app token cache, the app still
                 // works correctly, since the in-memory cache is not persistent across calls to SyncController anyway. If you build a persistent app token cache for MSAL, you should make sure to clear
                 // it at this point in the code.
-                serializedAppTokenCache.Clear();
+                serializedAppTokenCache.Clear(Startup.clientId);
             }
 
             if (!response.IsSuccessStatusCode)
