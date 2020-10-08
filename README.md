@@ -162,6 +162,8 @@ The application will then ask for permission to read the list of users in your t
 **You will be signed out from the app after granting permission**. This is done to ensure that any existing access tokens for Graph is removed from the token cache. Once you sign in again, the  fresh token obtained will have the necessary permissions to make calls to MS Graph.
 When you grant the permission, the application will then be able to query for users at any point.  You can verify this by clicking the **Sync Users** button on the users page, refreshing the list of users.  Try adding or removing a user and re-syncing the list (but note that it only syncs the first page of users!).
 
+> [Consider taking a moment to share your experience with us.](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR73pcsbpbxNJuZCMKN0lURpUMDVTMEM4SzA1N0FZR1lCQzE5S1lXN0ZLUSQlQCN0PWcu)
+
 ## About the code
 
 The relevant code for this sample is in the following files:
