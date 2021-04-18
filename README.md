@@ -222,6 +222,10 @@ In the left-hand navigation pane, select the **Azure Active Directory** service,
 1. From the *Branding* menu, update the **Home page URL**, to the address of your service, for example [https://dotnet-web-daemon-v2-contoso.azurewebsites.net](https://dotnet-web-daemon-v2-contoso.azurewebsites.net). Save the configuration.
 1. Add the same URL in the list of values of the *Authentication -> Redirect URIs* menu. If you have multiple redirect urls, make sure that there a new entry using the App service's Uri for each redirect url.
 
+## Troubleshooting
+
+If you get an HTTP 403, even after admin consent, you might have chosen **Delegated permissions** for **User.Read.All** instead of **Application permissions**.
+
 ## Community Help and Support
 
 Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
