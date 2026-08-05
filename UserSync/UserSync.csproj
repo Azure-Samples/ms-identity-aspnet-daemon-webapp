@@ -101,7 +101,8 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\jquery-3.7.1.js" />
+    <Content Include="Scripts\jquery-3.7.1.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -139,7 +140,7 @@
       <Version>3.4.1</Version>
     </PackageReference>
     <PackageReference Include="jQuery">
-      <Version>1.10.2</Version>
+      <Version>3.7.1</Version>
     </PackageReference>
     <PackageReference Include="jQuery.Validation">
       <Version>1.19.4</Version>
