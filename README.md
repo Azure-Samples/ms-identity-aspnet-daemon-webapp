@@ -5,7 +5,7 @@ languages:
 - javascript
 - html
 page_type: sample
-description: "Use the Microsoft identity platform endpoint to access the data of Microsoft business customers in a long-running, non-interactive process."
+description: "Deprecated ASP.NET daemon web app sample. Use the current .NET console daemon samples instead."
 products:
 - azure
 - azure-active-directory
@@ -14,6 +14,9 @@ urlFragment: build-multi-tenant-daemon-aad
 ---
 
 # Build a multi-tenant daemon with the Microsoft identity platform endpoint
+
+> [!IMPORTANT]
+> **This sample is deprecated and is no longer maintained.** For current daemon application guidance, use the [`console-daemon` sample in `ms-identity-docs-code-dotnet`](https://github.com/Azure-Samples/ms-identity-docs-code-dotnet/tree/main/console-daemon) or [active-directory-dotnetcore-daemon-v2](https://github.com/Azure-Samples/active-directory-dotnetcore-daemon-v2).
 
 ![Build Badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/33/badge)
 
